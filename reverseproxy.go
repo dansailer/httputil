@@ -310,7 +310,8 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		// X-Forwarded-For information as a comma+space
 		// separated list and fold multiple headers into one.
 		prior, ok := outreq.Header["X-Forwarded-For"]
-		omit := ok && prior == nil // Issue 38079: nil now means don't populate the header
+		omit := ok && prior == nil                                  // Issue 38079: nil now means don't populate the header
+		omit = omit || (len(prior) == 0 && clientIP == "127.0.0.1") // Omit header if only 127.0.0.1
 		if len(prior) > 0 {
 			clientIP = strings.Join(prior, ", ") + ", " + clientIP
 		}
